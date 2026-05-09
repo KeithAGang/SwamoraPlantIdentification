@@ -10,6 +10,8 @@
 **/build/
 **/.vite/
 
+**/.claude
+.claude
 # TypeScript
 **/*.tsbuildinfo
 
