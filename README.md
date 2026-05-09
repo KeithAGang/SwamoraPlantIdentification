@@ -11,7 +11,7 @@ Swamora/
 
 ---
 
-## Quick start (Docker — full stack)
+## Quick start — Docker (recommended)
 
 Requires Docker and Docker Compose.
 
@@ -20,59 +20,54 @@ Requires Docker and Docker Compose.
 docker compose up --build
 ```
 
-| Service  | URL                          |
-|----------|------------------------------|
-| Frontend | http://localhost:5173        |
-| API      | http://localhost:3000        |
+The API container automatically applies the database schema and seeds the default account on first boot. No extra steps needed.
+
+| Service  | URL                             |
+|----------|---------------------------------|
+| Frontend | http://localhost:5173           |
+| API      | http://localhost:3000           |
 | API docs | http://localhost:3000/reference |
 
-After the stack is up, seed the default account (first time only):
-
-```bash
-docker compose exec api node dist/db/seed.js
-```
-
-> Default login: `swamora@img.plant` / `abcd1234`
+Default login: `swamora@img.plant` / `abcd1234`
 
 ---
 
-## Development setup (local)
+## Local development
 
-Prerequisites: Node 20+, PostgreSQL running locally.
+Prerequisites: Node 20+, a PostgreSQL instance running locally.
 
-**Backend**
+**1. Backend**
 
 ```bash
 cd SwamoraPlant.Server
-cp .env.example .env        # fill in DATABASE_URL and JWT_SECRET
+cp .env.example .env   # set DATABASE_URL and JWT_SECRET
 npm install
-npm run db:push             # push schema to postgres
-npm run db:seed             # seed default account
-npm run dev                 # http://localhost:3000
+npm run db:push        # create tables
+npm run db:seed        # insert default account
+npm run dev            # → http://localhost:3000
 ```
 
-**Frontend**
+**2. Frontend** (separate terminal)
 
 ```bash
 cd SwamoraPlant.ui
-cp .env.example .env        # set VITE_API_BASE_URL if needed
 npm install
-npm run dev                 # http://localhost:5173
+npm run dev            # → http://localhost:5173
 ```
 
-The Vite dev server proxies `/api` to `http://localhost:3000` automatically.
+Vite proxies all `/api` requests to `http://localhost:3000` in dev mode, so no frontend env var is needed.
 
 ---
 
-## Individual Docker stacks
+## Running pieces independently
 
-Each subproject has its own `docker-compose.yml` for running that piece independently:
+Each subproject has its own `docker-compose.yml`:
 
 ```bash
 # Backend + DB only
 cd SwamoraPlant.Server && docker compose up --build
 
-# Frontend only
+# Frontend only (set VITE_API_BASE_URL to point at your API)
 cd SwamoraPlant.ui && docker compose up --build
 ```
 
@@ -80,10 +75,10 @@ cd SwamoraPlant.ui && docker compose up --build
 
 ## Stack
 
-| Layer    | Technology                            |
-|----------|---------------------------------------|
-| Backend  | HonoJS · Drizzle ORM · PostgreSQL     |
-| Auth     | JWT (jose) · bcryptjs                 |
-| API docs | Scalar · OpenAPI 3.0                  |
-| Frontend | React 19 · Vite · TanStack Router     |
-| UI       | Tailwind v4 · shadcn/ui               |
+| Layer    | Technology                        |
+|----------|-----------------------------------|
+| Backend  | HonoJS · Drizzle ORM · PostgreSQL |
+| Auth     | JWT (jose) · bcryptjs             |
+| API docs | Scalar · OpenAPI 3.0              |
+| Frontend | React 19 · Vite · TanStack Router |
+| UI       | Tailwind v4 · shadcn/ui           |
