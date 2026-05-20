@@ -29,6 +29,10 @@ services:
       DATABASE_URL: postgres://admin:root@db:5432/swamora
       NODE_ENV: production
       ALLOWED_ORIGINS: "http://localhost:5173,http://localhost"
+      UPLOAD_ROOT: /app/uploads
+    volumes:
+      # Persist user-uploaded plant images outside the container for the data moat.
+      - uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -41,6 +45,8 @@ services:
       args:
         # Empty → frontend uses relative paths; nginx proxies /api to api:3000
         VITE_API_BASE_URL: ""
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY:-}
+        VITE_GOOGLE_MAPS_MAP_ID: ${VITE_GOOGLE_MAPS_MAP_ID:-}
     ports:
       - "5173:80"
     depends_on:
@@ -49,3 +55,4 @@ services:
 
 volumes:
   pgdata:
+  uploads:

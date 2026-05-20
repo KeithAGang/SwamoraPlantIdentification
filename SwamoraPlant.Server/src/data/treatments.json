@@ -46,6 +46,26 @@
       "summary": "Bacterial spot. Apply copper-based bactericide; rotate crops next season.",
       "medicine": "Copper bactericide",
       "productKeywords": ["copper bactericide", "copper sulfate"]
+    },
+    "spider_mites": {
+      "summary": "Two-spotted spider mites. Spray with insecticidal soap or a miticide (abamectin); rinse foliage to dislodge mites.",
+      "medicine": "Abamectin miticide",
+      "productKeywords": ["abamectin miticide", "insecticidal soap"]
+    },
+    "target_spot": {
+      "summary": "Target spot (Corynespora cassiicola). Apply chlorothalonil or mancozeb fungicide and remove infected lower leaves.",
+      "medicine": "Chlorothalonil fungicide",
+      "productKeywords": ["chlorothalonil fungicide", "mancozeb fungicide"]
+    },
+    "yellow_leaf_curl_virus": {
+      "summary": "Tomato Yellow Leaf Curl Virus — spread by whiteflies. Remove infected plants and control whiteflies with imidacloprid or insecticidal soap.",
+      "medicine": "Imidacloprid insecticide",
+      "productKeywords": ["imidacloprid insecticide", "whitefly control"]
+    },
+    "mosaic_virus": {
+      "summary": "Tomato mosaic virus — no chemical cure. Remove infected plants, disinfect tools, and avoid handling plants after tobacco.",
+      "medicine": null,
+      "productKeywords": []
     }
   },
   "maize": {

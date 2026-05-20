@@ -16,9 +16,13 @@ export const imageBufferToTensor = async (
   buffer: Buffer,
   { inputSize, mean, std }: PreprocessOptions,
 ): Promise<Float32Array> => {
+  // Match the training-time preprocessing exactly:
+  //   transforms.Resize((IMG_SIZE, IMG_SIZE)) in PyTorch stretches the image
+  //   to a fixed square. We must do the same (fit: 'fill') instead of cropping,
+  //   otherwise the model sees different content than it learned on.
   const { data } = await sharp(buffer)
     .removeAlpha()
-    .resize(inputSize, inputSize, { fit: 'cover' })
+    .resize(inputSize, inputSize, { fit: 'fill' })
     .raw()
     .toBuffer({ resolveWithObject: true });
 

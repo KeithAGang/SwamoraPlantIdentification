@@ -14,6 +14,14 @@ export interface Treatment {
   productKeywords: string[]
 }
 
+export interface DiseaseInfo {
+  name: string
+  scientificName: string | null
+  severity: 'none' | 'mild' | 'moderate' | 'severe'
+  description: string
+  symptoms: string[]
+}
+
 export interface Shop {
   name: string
   address: string
@@ -24,11 +32,15 @@ export interface Shop {
 }
 
 export interface DiagnosisResult {
+  id: number
   plant: PlantType
   topPrediction: Prediction
   predictions: Prediction[]
   treatment: Treatment
+  diseaseInfo: DiseaseInfo
   shops: Shop[]
+  imageId: number
+  createdAt: string
 }
 
 export interface DiagnoseParams {
@@ -49,6 +61,11 @@ export const diagnoseApi = {
     const res = await api.post<DiagnosisResult>('/api/diagnose', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
+    return res.data
+  },
+
+  async getById(id: number): Promise<DiagnosisResult> {
+    const res = await api.get<DiagnosisResult>(`/api/diagnose/${id}`)
     return res.data
   },
 }

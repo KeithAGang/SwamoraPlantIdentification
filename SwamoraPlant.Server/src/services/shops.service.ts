@@ -22,12 +22,20 @@ export interface Shop {
 export interface FindShopsParams {
   location: ShopLocation;
   productKeywords: string[];
+  /** Optional free-text query (used by the browse mode on /map). */
+  query?: string;
   radiusMeters?: number;
   limit?: number;
 }
 
 const DEFAULT_RADIUS_M = 10_000;
-const DEFAULT_LIMIT = 5;
+const DEFAULT_LIMIT = 8;
+
+// Harare is the realistic default centre for most of our users.
+export const DEFAULT_LOCATION: ShopLocation = { lat: -17.8252, lng: 31.0335 };
+
+// Always prepend this so results stay constrained to the agriculture moat.
+const SCOPE_PREFIX = 'agrochemical';
 
 const haversineMeters = (a: ShopLocation, b: ShopLocation): number => {
   const R = 6_371_000;
@@ -85,20 +93,30 @@ interface GooglePlacesResponse {
   error_message?: string;
 }
 
+/**
+ * Build the Google Places text-search query. Always prepended with
+ * "agrochemical" so we stay scoped to agri shops even when the caller passes a
+ * free-text query like "fertilizer" or "Mancozeb".
+ */
+const buildSearchQuery = (params: FindShopsParams): string => {
+  const parts: string[] = [SCOPE_PREFIX];
+  if (params.productKeywords.length > 0) parts.push(params.productKeywords[0]);
+  if (params.query) parts.push(params.query);
+  parts.push('shop');
+  return parts.join(' ');
+};
+
 const fetchFromGoogle = async (
   params: FindShopsParams,
   apiKey: string,
 ): Promise<Shop[]> => {
   const radius = params.radiusMeters ?? DEFAULT_RADIUS_M;
   const limit = params.limit ?? DEFAULT_LIMIT;
-  const keyword =
-    params.productKeywords.length > 0
-      ? params.productKeywords[0]
-      : 'agrochemical';
+  const query = buildSearchQuery(params);
 
   // Text Search supports keyword + location bias; gives richer results than Nearby Search for product names.
   const url = new URL('https://maps.googleapis.com/maps/api/place/textsearch/json');
-  url.searchParams.set('query', `${keyword} shop`);
+  url.searchParams.set('query', query);
   url.searchParams.set('location', `${params.location.lat},${params.location.lng}`);
   url.searchParams.set('radius', String(radius));
   url.searchParams.set('key', apiKey);
@@ -125,9 +143,14 @@ const fetchFromGoogle = async (
   });
 };
 
-export const findNearbyShops = async (params: FindShopsParams): Promise<Shop[]> => {
+/**
+ * Public shop search. Used by:
+ *   - the diagnosis flow (productKeywords from treatments.json)
+ *   - the /map browse view (optional free-text query)
+ */
+export const findShops = async (params: FindShopsParams): Promise<Shop[]> => {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-  if (apiKey && params.productKeywords.length > 0) {
+  if (apiKey) {
     try {
       return await fetchFromGoogle(params, apiKey);
     } catch (err) {
@@ -136,3 +159,6 @@ export const findNearbyShops = async (params: FindShopsParams): Promise<Shop[]> 
   }
   return mockShops(params.location, params.limit ?? DEFAULT_LIMIT);
 };
+
+/** Back-compat alias for the diagnosis flow which used the old name. */
+export const findNearbyShops = findShops;

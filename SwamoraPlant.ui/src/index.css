@@ -43,7 +43,7 @@
 }
 
 :root {
-    /* AI Greenhouse — light, glassy */
+    /* FarmSight — light, glassy */
     --background: oklch(0.985 0.005 220);       /* near-white sky */
     --foreground: oklch(0.18 0.02 145);         /* dark ink */
     --card: oklch(1 0 0);                       /* glassy white */
@@ -129,7 +129,7 @@
       0 1px 3px oklch(0 0 0 / 0.06),
       0 4px 12px oklch(0 0 0 / 0.05);
   }
-  /* Glassy card used everywhere on the AI Greenhouse dashboard */
+  /* Glassy card used everywhere on the FarmSight dashboard */
   .glass-card {
     background: rgba(255, 255, 255, 0.62);
     backdrop-filter: blur(18px) saturate(140%);
@@ -159,7 +159,7 @@
     background: rgba(30, 40, 34, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.06);
   }
-  /* AI Assistant gradient pill */
+  /* Savi (AI assistant) gradient pill */
   .ai-pill {
     background: linear-gradient(135deg, #b6f37a 0%, #6fd24a 60%, #4cb84a 100%);
     color: #0f2410;

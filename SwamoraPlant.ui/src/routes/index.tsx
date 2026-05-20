@@ -31,7 +31,7 @@ function DashboardPage() {
   return (
     <AppShell>
       <div className="grid grid-cols-12 gap-4">
-        {/* Hero greenhouse card with floating Harvest AI gauge */}
+        {/* Hero greenhouse card with floating Savi gauge */}
         <HeroCard className="col-span-12 lg:col-span-8" />
 
         {/* Right column: Water Flow + Power Consumption */}
@@ -94,7 +94,7 @@ function HeroCard({ className = '' }: { className?: string }) {
       {/* Subtle bottom fade for readability */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
 
-      {/* Floating Harvest AI gauge */}
+      {/* Floating Savi gauge */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px]">
         <div className="glass-card rounded-2xl p-4">
           <div className="flex items-center justify-between">
@@ -102,7 +102,7 @@ function HeroCard({ className = '' }: { className?: string }) {
               <div className="glass-pill h-7 w-7 rounded-lg flex items-center justify-center">
                 <Sparkles className="h-3.5 w-3.5" />
               </div>
-              <span className="text-sm font-medium">Harvest AI</span>
+              <span className="text-sm font-medium">Savi</span>
             </div>
             <button
               type="button"

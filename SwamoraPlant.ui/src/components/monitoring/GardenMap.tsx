@@ -74,7 +74,9 @@ function MapFallback({ garden }: { garden: GardenInfo }) {
 }
 
 // Soft light map style matching the paper aesthetic.
-const LIGHT_STYLE: google.maps.MapTypeStyle[] = [
+// Typed as `unknown[]` because @types/google.maps isn't installed; the
+// value is consumed by @vis.gl/react-google-maps which validates at runtime.
+const LIGHT_STYLE: unknown[] = [
   { elementType: 'geometry', stylers: [{ color: '#f5f1e8' }] },
   { elementType: 'labels.text.fill', stylers: [{ color: '#7a7867' }] },
   { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f1e8' }] },

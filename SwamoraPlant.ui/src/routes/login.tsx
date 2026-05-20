@@ -71,7 +71,7 @@ function LoginPage() {
         <div className="flex flex-col items-center mb-10 gap-3">
           <LeafMark />
           <div className="text-center">
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">SwamoraPlant</h1>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">FarmSight</h1>
             <p className="text-sm text-muted-foreground mt-0.5">Sign in to continue</p>
           </div>
         </div>

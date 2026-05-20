@@ -1,0 +1,209 @@
+{
+  "potato": {
+    "healthy": {
+      "name": "Healthy",
+      "scientificName": null,
+      "severity": "none",
+      "description": "Leaves show uniform green colour, no spots or lesions, and intact margins. The plant is photosynthesising normally.",
+      "symptoms": [
+        "Uniform green colour across the leaf",
+        "No spots, holes, or lesions",
+        "Firm, upright posture"
+      ]
+    },
+    "early_blight": {
+      "name": "Early Blight",
+      "scientificName": "Alternaria solani",
+      "severity": "moderate",
+      "description": "A common fungal disease that attacks older, lower leaves first and forms characteristic concentric brown rings that resemble a target. Spreads in warm, wet weather and can defoliate plants if left untreated.",
+      "symptoms": [
+        "Dark brown spots with concentric rings (bull's-eye pattern)",
+        "Yellow halo around each lesion",
+        "Older lower leaves affected first",
+        "Severe infection leads to defoliation"
+      ]
+    },
+    "late_blight": {
+      "name": "Late Blight",
+      "scientificName": "Phytophthora infestans",
+      "severity": "severe",
+      "description": "An aggressive water-mould disease responsible for the Irish potato famine. Spreads explosively in cool, humid weather and can destroy a crop within days. Acts on stems, leaves, and tubers.",
+      "symptoms": [
+        "Large, irregular water-soaked lesions",
+        "White fuzzy growth on undersides of leaves in humid conditions",
+        "Rapid blackening and collapse of foliage",
+        "Brownish granular rot in tubers"
+      ]
+    }
+  },
+  "maize": {
+    "healthy": {
+      "name": "Healthy",
+      "scientificName": null,
+      "severity": "none",
+      "description": "Leaves are deep green, free of lesions and pustules, and the plant is growing vigorously.",
+      "symptoms": [
+        "Deep green leaf colour",
+        "No spots, streaks, or pustules",
+        "Upright growth and intact tassels"
+      ]
+    },
+    "northern_leaf_blight": {
+      "name": "Northern Leaf Blight",
+      "scientificName": "Exserohilum turcicum",
+      "severity": "moderate",
+      "description": "A fungal disease that produces long, cigar-shaped grey-green lesions running parallel to the leaf veins. Favoured by moderate temperatures and prolonged leaf wetness. Yield losses can be heavy if infection starts before tasseling.",
+      "symptoms": [
+        "Long elliptical (cigar-shaped) grey-green lesions",
+        "Lesions run parallel to the leaf veins",
+        "Lower leaves affected first, then spreading upward",
+        "Lesions turn tan and may merge"
+      ]
+    },
+    "common_rust": {
+      "name": "Common Rust",
+      "scientificName": "Puccinia sorghi",
+      "severity": "mild",
+      "description": "A fungal disease easily recognised by small reddish-brown powdery pustules scattered on both sides of the leaf. Cooler, humid conditions promote spread. Usually mild but can stunt growth if severe.",
+      "symptoms": [
+        "Small reddish-brown powdery pustules",
+        "Pustules on both upper and lower leaf surfaces",
+        "Pustules later turn dark brown to black",
+        "Leaves may yellow and dry around lesions"
+      ]
+    },
+    "gray_leaf_spot": {
+      "name": "Gray Leaf Spot",
+      "scientificName": "Cercospora zeae-maydis",
+      "severity": "moderate",
+      "description": "A fungal disease producing narrow rectangular lesions sharply bounded by leaf veins. Thrives in warm, humid conditions and continuous maize cropping. Can severely reduce kernel fill if it reaches the ear leaf early.",
+      "symptoms": [
+        "Narrow rectangular grey-tan lesions",
+        "Lesions sharply bounded by leaf veins",
+        "Yellow halo when held against the light",
+        "Lesions merge causing whole-leaf blight"
+      ]
+    }
+  },
+  "tomato": {
+    "healthy": {
+      "name": "Healthy",
+      "scientificName": null,
+      "severity": "none",
+      "description": "Foliage is uniformly green, glossy, and free of lesions or insect damage. Stems are sturdy and the plant is fruiting normally.",
+      "symptoms": [
+        "Uniform green leaves with no spots",
+        "Sturdy upright stems",
+        "Normal fruit set"
+      ]
+    },
+    "bacterial_spot": {
+      "name": "Bacterial Spot",
+      "scientificName": "Xanthomonas spp.",
+      "severity": "moderate",
+      "description": "A bacterial disease producing many small, dark, water-soaked spots on leaves, stems, and fruit. Spreads quickly in warm wet weather and on contaminated tools or splashing water.",
+      "symptoms": [
+        "Small dark water-soaked spots that turn brown",
+        "Spots on fruit have a raised scab-like centre",
+        "Leaves may turn yellow and drop",
+        "Lesions can also appear on stems"
+      ]
+    },
+    "early_blight": {
+      "name": "Early Blight",
+      "scientificName": "Alternaria solani",
+      "severity": "moderate",
+      "description": "A fungal disease producing concentric-ring lesions on older leaves. Lower foliage is hit first and can lead to extensive defoliation, exposing fruit to sunscald.",
+      "symptoms": [
+        "Dark brown spots with concentric rings",
+        "Yellow halo around lesions",
+        "Lower leaves affected first",
+        "Stem and fruit lesions in heavy infections"
+      ]
+    },
+    "late_blight": {
+      "name": "Late Blight",
+      "scientificName": "Phytophthora infestans",
+      "severity": "severe",
+      "description": "An aggressive water-mould disease that can destroy a tomato crop within days in cool damp weather. Affects leaves, stems, and fruit.",
+      "symptoms": [
+        "Large pale-green to brown water-soaked patches",
+        "White mould growth on leaf undersides in humid weather",
+        "Rapid blackening and collapse of stems",
+        "Firm, greasy-looking brown patches on fruit"
+      ]
+    },
+    "leaf_mold": {
+      "name": "Leaf Mold",
+      "scientificName": "Passalora fulva (Fulvia fulva)",
+      "severity": "moderate",
+      "description": "A fungal disease most common in humid greenhouses. Pale yellow spots appear on the upper leaf surface with a corresponding olive-green to brown velvety mould on the underside.",
+      "symptoms": [
+        "Pale yellow blotches on upper leaf surface",
+        "Olive-green to brown velvety mould on leaf underside",
+        "Affected leaves curl, dry, and drop",
+        "Lower foliage affected first"
+      ]
+    },
+    "septoria_leaf_spot": {
+      "name": "Septoria Leaf Spot",
+      "scientificName": "Septoria lycopersici",
+      "severity": "moderate",
+      "description": "A fungal disease producing many small circular spots with dark borders and tan-grey centres. Spreads upward from lower leaves and can defoliate plants if untreated.",
+      "symptoms": [
+        "Many small circular spots (2–5 mm)",
+        "Tan-grey centres with darker borders",
+        "Tiny black dots (fungal fruiting bodies) inside spots",
+        "Heavy infection leads to leaf yellowing and drop"
+      ]
+    },
+    "spider_mites": {
+      "name": "Two-Spotted Spider Mites",
+      "scientificName": "Tetranychus urticae",
+      "severity": "moderate",
+      "description": "A pest infestation rather than a pathogen. Tiny mites feed on the underside of leaves, causing stippling and fine webbing. Populations explode in hot, dry conditions.",
+      "symptoms": [
+        "Fine pale stippling (yellow speckles) on leaves",
+        "Bronze or yellow discolouration of foliage",
+        "Fine silken webbing on undersides and between leaves",
+        "Tiny moving specks visible with a hand lens"
+      ]
+    },
+    "target_spot": {
+      "name": "Target Spot",
+      "scientificName": "Corynespora cassiicola",
+      "severity": "moderate",
+      "description": "A fungal disease producing brown lesions with concentric rings resembling a target. Affects leaves, stems, and fruit, especially in humid conditions.",
+      "symptoms": [
+        "Brown lesions with concentric rings",
+        "Lesions may have a yellow halo",
+        "Spots can coalesce and cause defoliation",
+        "Sunken brown lesions on fruit"
+      ]
+    },
+    "yellow_leaf_curl_virus": {
+      "name": "Tomato Yellow Leaf Curl Virus",
+      "scientificName": "TYLCV (Begomovirus)",
+      "severity": "severe",
+      "description": "A viral disease spread by whiteflies. Severely stunts plants and reduces fruit set; there is no chemical cure — control the whitefly vector and remove infected plants.",
+      "symptoms": [
+        "Upward curling and crumpling of leaves",
+        "Pronounced yellowing along leaf margins",
+        "Severe stunting of new growth",
+        "Drastically reduced fruit set"
+      ]
+    },
+    "mosaic_virus": {
+      "name": "Tomato Mosaic Virus",
+      "scientificName": "ToMV / TMV",
+      "severity": "severe",
+      "description": "A highly contagious viral disease producing mottled light-and-dark green patterns on leaves. Transmitted mechanically (contaminated hands, tools, tobacco). No cure — remove and destroy infected plants.",
+      "symptoms": [
+        "Mottled light-and-dark green mosaic pattern",
+        "Curled, narrow, or fern-like leaves",
+        "Stunted growth and reduced yield",
+        "Uneven fruit colour or internal browning"
+      ]
+    }
+  }
+}
