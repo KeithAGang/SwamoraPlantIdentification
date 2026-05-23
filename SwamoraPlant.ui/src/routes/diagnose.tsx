@@ -103,14 +103,10 @@ function DiagnosePage() {
         video: { facingMode },
       })
       streamRef.current = mediaStream
+      // The <video> element only mounts when `stream` is truthy, so we set the
+      // stream here and let an effect attach it to the video element once it
+      // exists in the DOM.
       setStream(mediaStream)
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream
-        videoRef.current.onloadedmetadata = () => {
-          setCameraReady(true)
-          void videoRef.current?.play().catch(() => undefined)
-        }
-      }
       const devices = await navigator.mediaDevices.enumerateDevices()
       setHasMultipleCameras(devices.filter((d) => d.kind === 'videoinput').length > 1)
     } catch {
@@ -120,6 +116,24 @@ function DiagnosePage() {
       })
     }
   }
+
+  // Attach the MediaStream to the <video> element once both exist. This handles
+  // the fact that the <video> is conditionally rendered after `stream` is set.
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || !stream) return
+    video.srcObject = stream
+    const onReady = () => {
+      setCameraReady(true)
+      void video.play().catch(() => undefined)
+    }
+    if (video.readyState >= 1) {
+      onReady()
+    } else {
+      video.addEventListener('loadedmetadata', onReady)
+    }
+    return () => video.removeEventListener('loadedmetadata', onReady)
+  }, [stream])
 
   useEffect(() => {
     if (!ready) return
@@ -669,22 +683,39 @@ function AiPromptCard({
 }) {
   const [chatOpen, setChatOpen] = useState(false)
 
+  const products = result?.treatment.products ?? []
+  const cheapest =
+    products.length > 0
+      ? products.reduce((min, p) => (p.priceUsd < min.priceUsd ? p : min), products[0])
+      : null
+
   const text = result
     ? `Diagnosed ${PLANT_LABELS[plantType]} as ${formatLabel(
         result.topPrediction.label,
       )}. Apply ${
         result.treatment.medicine ?? 'recommended treatment'
+      }${
+        cheapest
+          ? ` (from ~$${cheapest.priceUsd} for ${cheapest.size})`
+          : ''
       } and monitor over the next 7 days.`
     : hasPhoto
       ? `Photo captured for ${PLANT_LABELS[plantType]}. Tap Diagnose to run the on-device model and generate a treatment plan.`
       : `Act as an agriculture data analytics system. Select ${PLANT_LABELS[plantType]} crop, capture a clean leaf photo, and the AI will identify disease and recommend treatment.`
 
   const quickQuestions = result
-    ? [
-        'How do I apply this treatment?',
-        'Will this product harm bees?',
-        'Best weather to spray?',
-      ]
+    ? products.length > 0
+      ? [
+          'How do I apply this treatment?',
+          'What are the prices and alternatives?',
+          'Where can I buy these products?',
+          'Best weather to spray?',
+        ]
+      : [
+          'How do I apply this treatment?',
+          'Will this product harm bees?',
+          'Best weather to spray?',
+        ]
     : [
         'How should I photograph a leaf?',
         'What plants do you support?',

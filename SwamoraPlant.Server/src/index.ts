@@ -26,9 +26,22 @@ app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
 
 app.use('*', cors({
   origin: (origin) => {
-    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
-    if (allowedOrigins.includes(origin) || !origin || process.env.NODE_ENV !== 'production') {
+    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || [];
+    if (!origin || process.env.NODE_ENV !== 'production') {
       return origin;
+    }
+    if (allowedOrigins.includes(origin)) {
+      return origin;
+    }
+    // Allow common tunnel providers (VS Code dev tunnels, ngrok, cloudflare) so
+    // the app can be shared from a local dev machine during demos.
+    try {
+      const host = new URL(origin).hostname;
+      if (/\.(devtunnels\.ms|ngrok-free\.app|ngrok\.io|trycloudflare\.com)$/i.test(host)) {
+        return origin;
+      }
+    } catch {
+      // fall through
     }
     return allowedOrigins[0];
   },

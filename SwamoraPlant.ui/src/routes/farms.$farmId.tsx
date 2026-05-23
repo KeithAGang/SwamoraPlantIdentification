@@ -212,6 +212,7 @@ function FarmDetailPage() {
       <SaviDialog
         open={saviOpen}
         onClose={() => setSaviOpen(false)}
+        farmId={farmId}
         starters={
           farm
             ? [

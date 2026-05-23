@@ -28,7 +28,7 @@ services:
       # Override DATABASE_URL to use the Docker service name instead of localhost
       DATABASE_URL: postgres://admin:root@db:5432/swamora
       NODE_ENV: production
-      ALLOWED_ORIGINS: "http://localhost:5173,http://localhost"
+      ALLOWED_ORIGINS: "http://localhost:5173,http://localhost,https://5tdvftv5-5173.uks1.devtunnels.ms"
       UPLOAD_ROOT: /app/uploads
     volumes:
       # Persist user-uploaded plant images outside the container for the data moat.

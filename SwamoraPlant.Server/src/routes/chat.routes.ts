@@ -16,6 +16,7 @@ import {
   buildSystemPrompt,
   getConversation,
   loadDiagnosisContext,
+  loadFarmContext,
   newConversationId,
   saveMessage,
   streamGroq,
@@ -32,6 +33,7 @@ interface ChatBody {
   messages?: Array<{ role?: string; content?: string }>;
   conversationId?: string;
   diagnosisId?: number;
+  farmId?: number;
 }
 
 const validateMessages = (raw: ChatBody['messages']): ChatMessageInput[] => {
@@ -64,11 +66,18 @@ chatRouter.post('/chat', async (c) => {
       return c.json({ error: 'messages[] is required' }, 400);
     }
 
-    const diagnosisCtx =
+    const [diagnosisCtx, farmCtx] = await Promise.all([
       typeof body.diagnosisId === 'number'
-        ? await loadDiagnosisContext(userId, body.diagnosisId)
-        : undefined;
-    const systemPrompt = buildSystemPrompt({ diagnosis: diagnosisCtx });
+        ? loadDiagnosisContext(userId, body.diagnosisId)
+        : Promise.resolve(undefined),
+      typeof body.farmId === 'number'
+        ? loadFarmContext(userId, body.farmId)
+        : Promise.resolve(undefined),
+    ]);
+    const systemPrompt = buildSystemPrompt({
+      diagnosis: diagnosisCtx,
+      farm: farmCtx,
+    });
     const conversationId = body.conversationId || newConversationId();
 
     // Persist the latest user message (the one the LLM is about to answer).
@@ -121,11 +130,18 @@ chatRouter.post('/chat/stream', async (c) => {
     return c.json({ error: 'messages[] is required' }, 400);
   }
 
-  const diagnosisCtx =
+  const [diagnosisCtx, farmCtx] = await Promise.all([
     typeof body.diagnosisId === 'number'
-      ? await loadDiagnosisContext(userId, body.diagnosisId)
-      : undefined;
-  const systemPrompt = buildSystemPrompt({ diagnosis: diagnosisCtx });
+      ? loadDiagnosisContext(userId, body.diagnosisId)
+      : Promise.resolve(undefined),
+    typeof body.farmId === 'number'
+      ? loadFarmContext(userId, body.farmId)
+      : Promise.resolve(undefined),
+  ]);
+  const systemPrompt = buildSystemPrompt({
+    diagnosis: diagnosisCtx,
+    farm: farmCtx,
+  });
   const conversationId = body.conversationId || newConversationId();
 
   const lastUser = [...messages].reverse().find((m) => m.role === 'user');

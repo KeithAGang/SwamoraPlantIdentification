@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   DndContext,
   PointerSensor,
@@ -21,6 +21,7 @@ import { farmsApi } from '@/lib/farms'
 import { cn } from '@/lib/utils'
 import { WidgetFrame } from './widgets/WidgetFrame'
 import { getWidgetSpec } from './widgets/registry'
+import { WidgetSourceDialog, type WidgetSource } from './WidgetSourceDialog'
 
 interface WidgetGridProps {
   farmId: number
@@ -42,6 +43,8 @@ export function WidgetGrid({ farmId, widgets, onChange }: WidgetGridProps) {
   )
 
   const ids = useMemo(() => widgets.map((w) => w.id), [widgets])
+  const [configuringId, setConfiguringId] = useState<number | null>(null)
+  const configuring = widgets.find((w) => w.id === configuringId) ?? null
 
   const handleDragEnd = async (e: DragEndEvent) => {
     const { active, over } = e
@@ -84,21 +87,50 @@ export function WidgetGrid({ farmId, widgets, onChange }: WidgetGridProps) {
     }
   }
 
+  const handleSaveSource = async (
+    widgetId: number,
+    dataSource: WidgetSource,
+    config: Record<string, unknown>,
+  ) => {
+    const next = widgets.map((w) =>
+      w.id === widgetId ? { ...w, dataSource, config } : w,
+    )
+    onChange(next)
+    try {
+      await farmsApi.updateWidget(farmId, widgetId, { dataSource, config })
+    } catch {
+      // ignore — UI already reflects the optimistic change
+    }
+  }
+
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={ids} strategy={rectSortingStrategy}>
-        <div className="grid grid-cols-12 gap-4">
-          {widgets.map((w) => (
-            <SortableWidget
-              key={w.id}
-              widget={w}
-              onRemove={() => handleRemove(w.id)}
-              onResize={(size) => handleResize(w.id, size)}
-            />
-          ))}
-        </div>
-      </SortableContext>
-    </DndContext>
+    <>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={ids} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-12 gap-4">
+            {widgets.map((w) => (
+              <SortableWidget
+                key={w.id}
+                widget={w}
+                onRemove={() => handleRemove(w.id)}
+                onResize={(size) => handleResize(w.id, size)}
+                onConfigureSource={() => setConfiguringId(w.id)}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+      {configuring && (
+        <WidgetSourceDialog
+          open={configuringId !== null}
+          widget={configuring}
+          onClose={() => setConfiguringId(null)}
+          onSave={(dataSource, config) =>
+            handleSaveSource(configuring.id, dataSource, config)
+          }
+        />
+      )}
+    </>
   )
 }
 
@@ -106,10 +138,12 @@ function SortableWidget({
   widget,
   onRemove,
   onResize,
+  onConfigureSource,
 }: {
   widget: Widget
   onRemove: () => void
   onResize: (size: Widget['size']) => void
+  onConfigureSource: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: widget.id,
@@ -135,6 +169,7 @@ function SortableWidget({
         isDragging={isDragging}
         onRemove={onRemove}
         onResize={onResize}
+        onConfigureSource={onConfigureSource}
       >
         <Body widget={widget} />
       </WidgetFrame>

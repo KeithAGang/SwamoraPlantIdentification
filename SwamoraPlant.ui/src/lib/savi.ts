@@ -14,6 +14,7 @@ export interface SaviChatResponse {
 export interface SaviChatRequest {
   messages: SaviMessage[]
   diagnosisId?: number
+  farmId?: number
   conversationId?: string
 }
 

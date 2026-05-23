@@ -8,6 +8,8 @@ interface SaviDialogProps {
   onClose: () => void
   /** Optional diagnosis to ground the conversation. Server pulls the full record. */
   diagnosisId?: number
+  /** Optional farm to ground the conversation in (server loads widgets + metadata). */
+  farmId?: number
   /** Optional override for suggestion chips (e.g. on the Diagnose page). */
   starters?: string[]
 }
@@ -30,6 +32,7 @@ export function SaviDialog({
   open,
   onClose,
   diagnosisId,
+  farmId,
   starters,
 }: SaviDialogProps) {
   const [messages, setMessages] = useState<SaviMessage[]>([])
@@ -94,6 +97,7 @@ export function SaviDialog({
         {
           messages: next,
           diagnosisId,
+          farmId,
           conversationId,
         },
         (delta) => {

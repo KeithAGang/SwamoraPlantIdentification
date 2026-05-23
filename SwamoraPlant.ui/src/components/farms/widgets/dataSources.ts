@@ -152,8 +152,20 @@ export const readWidget = (
   source: string,
   config?: Record<string, unknown>,
 ): WidgetReading => {
-  // Future: switch on `source` (sensor:<id>, manual) to read live data.
-  // For now everything is mock.
+  // Manual entry: use the value the user typed in the source dialog so the
+  // widget actually reflects their input.
+  if (source === 'manual' && config && typeof config.value === 'number') {
+    const fn = mockReadings[type]
+    const base = fn ? fn(config) : { value: 0 }
+    return {
+      ...base,
+      value: config.value,
+      unit: (config.unit as string) || base.unit,
+    }
+  }
+  // Future: switch on `source` (mqtt/http/blynk) to read live data via a
+  // backend bridge. For now non-mock sources still render mock data so the
+  // dashboard stays alive during the demo.
   void source
   const fn = mockReadings[type]
   if (fn) return fn(config)

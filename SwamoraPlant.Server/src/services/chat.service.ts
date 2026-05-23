@@ -13,8 +13,8 @@
 
 import { randomUUID } from 'node:crypto';
 import { db } from '../db/index.js';
-import { chatMessages, diagnoses } from '../db/schema.js';
-import { and, eq, desc } from 'drizzle-orm';
+import { chatMessages, diagnoses, farms, farmWidgets } from '../db/schema.js';
+import { and, eq, desc, asc } from 'drizzle-orm';
 
 export type Role = 'system' | 'user' | 'assistant';
 
@@ -40,36 +40,103 @@ If you suggest pesticide or fungicide dosages, add a short disclaimer:
 "Verify with a local agronomist before applying."
 You can recommend the user check the Map for shops carrying the suggested product, or take a fresh photo via Diagnose.`;
 
-/** Build the dynamic system prompt grounded in the current diagnosis context. */
-export const buildSystemPrompt = (ctx: {
-  diagnosis?: {
-    plant: string;
-    label: string;
-    confidence: number;
-    medicine: string | null;
-    summary: string;
-    diseaseName?: string;
-  };
-}): string => {
-  if (!ctx.diagnosis) return SYSTEM_BASE;
-  const d = ctx.diagnosis;
-  const confPct = Math.round(d.confidence * 100);
-  return `${SYSTEM_BASE}
+export interface DiagnosisContext {
+  plant: string;
+  label: string;
+  confidence: number;
+  medicine: string | null;
+  summary: string;
+  diseaseName?: string;
+  diseaseCause?: string;
+  diseaseSymptoms?: string[];
+  products: Array<{ name: string; size: string; priceUsd: number }>;
+  productKeywords: string[];
+}
 
-Current diagnosis context (use this to ground every answer):
+export interface FarmContext {
+  name: string;
+  cropType?: string | null;
+  location?: string | null;
+  widgets: Array<{
+    type: string;
+    title?: string | null;
+    size: string;
+    dataSource: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    config: Record<string, any>;
+  }>;
+}
+
+/** Build the dynamic system prompt grounded in the current diagnosis and/or farm. */
+export const buildSystemPrompt = (ctx: {
+  diagnosis?: DiagnosisContext;
+  farm?: FarmContext;
+}): string => {
+  const sections: string[] = [SYSTEM_BASE];
+
+  if (ctx.diagnosis) {
+    const d = ctx.diagnosis;
+    const confPct = Math.round(d.confidence * 100);
+    const productLines =
+      d.products.length > 0
+        ? d.products
+            .map(
+              (p) =>
+                `  • ${p.name} (${p.size}) — ~$${p.priceUsd} USD`,
+            )
+            .join('\n')
+        : '  • (no specific products listed for this diagnosis)';
+
+    sections.push(
+      `Current diagnosis context (use this to ground every answer):
 - Crop: ${d.plant}
 - Disease: ${d.diseaseName ?? d.label} (${confPct}% confidence)
 - Recommended treatment: ${d.medicine ?? 'None — plant looks healthy'}
-- Treatment notes: ${d.summary}
+- Treatment notes: ${d.summary}${
+        d.diseaseCause ? `\n- Cause: ${d.diseaseCause}` : ''
+      }${
+        d.diseaseSymptoms && d.diseaseSymptoms.length > 0
+          ? `\n- Key symptoms: ${d.diseaseSymptoms.join('; ')}`
+          : ''
+      }
+- Locally-available products with indicative prices:
+${productLines}
 
-When the user asks about "this disease" or "the treatment", they mean the above.`;
+When the user asks about prices, products, alternatives, or where to buy, answer from the product list above. When they ask about "this disease", "the treatment", "the medicine", they mean the above. If they want to physically buy these products, suggest opening the Map page in the app to find nearby shops.`,
+    );
+  }
+
+  if (ctx.farm) {
+    const f = ctx.farm;
+    const widgetLines =
+      f.widgets.length > 0
+        ? f.widgets
+            .map(
+              (w) =>
+                `  • ${w.title ?? w.type} (type: ${w.type}, source: ${w.dataSource})`,
+            )
+            .join('\n')
+        : '  • (no widgets configured yet)';
+    sections.push(
+      `Farm context the user is asking about:
+- Name: ${f.name}
+- Crop: ${f.cropType ?? 'unspecified'}
+- Location: ${f.location ?? 'unspecified'}
+- Tracked widgets / metrics on this farm:
+${widgetLines}
+
+When the user asks about "my farm", "this farm", or any metric (soil, water, weather, yield), refer to the widgets above. If a metric they ask about is not tracked yet, suggest they add the relevant widget.`,
+    );
+  }
+
+  return sections.join('\n\n');
 };
 
 /** Fetch a diagnosis and convert it into a system-prompt context object. */
 export const loadDiagnosisContext = async (
   userId: number,
   diagnosisId: number,
-): Promise<Parameters<typeof buildSystemPrompt>[0]['diagnosis'] | undefined> => {
+): Promise<DiagnosisContext | undefined> => {
   const rows = await db
     .select()
     .from(diagnoses)
@@ -80,8 +147,14 @@ export const loadDiagnosisContext = async (
   const treatment = row.treatment as {
     summary: string;
     medicine: string | null;
+    products?: Array<{ name: string; size: string; priceUsd: number }>;
+    productKeywords?: string[];
   };
-  const info = row.diseaseInfo as { name?: string } | null;
+  const info = row.diseaseInfo as {
+    name?: string;
+    cause?: string;
+    symptoms?: string[];
+  } | null;
   return {
     plant: row.plant,
     label: row.topLabel,
@@ -89,6 +162,44 @@ export const loadDiagnosisContext = async (
     medicine: treatment.medicine ?? null,
     summary: treatment.summary,
     diseaseName: info?.name,
+    diseaseCause: info?.cause,
+    diseaseSymptoms: info?.symptoms,
+    products: treatment.products ?? [],
+    productKeywords: treatment.productKeywords ?? [],
+  };
+};
+
+/** Fetch a farm + its widgets and shape them as a system-prompt context. */
+export const loadFarmContext = async (
+  userId: number,
+  farmId: number,
+): Promise<FarmContext | undefined> => {
+  const farmRows = await db
+    .select()
+    .from(farms)
+    .where(and(eq(farms.id, farmId), eq(farms.userId, userId)))
+    .limit(1);
+  const farm = farmRows[0];
+  if (!farm) return undefined;
+  const widgetRows = await db
+    .select()
+    .from(farmWidgets)
+    .where(
+      and(eq(farmWidgets.farmId, farmId), eq(farmWidgets.userId, userId)),
+    )
+    .orderBy(asc(farmWidgets.position), asc(farmWidgets.id));
+  return {
+    name: farm.name,
+    cropType: farm.cropType,
+    location: farm.location,
+    widgets: widgetRows.map((w) => ({
+      type: w.type,
+      title: w.title,
+      size: w.size,
+      dataSource: w.dataSource,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      config: (w.config as Record<string, any>) ?? {},
+    })),
   };
 };
 
