@@ -2,10 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import {
   Bell,
-  Calendar,
-  ClipboardList,
   Download,
-  Hash,
   Leaf,
   Lightbulb,
   LogOut,
@@ -34,9 +31,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: Leaf },
   { to: '/diagnose', label: 'Diagnose', icon: Droplets },
-  { to: '/devices', label: 'Schedule', icon: Calendar },
   { to: '/map', label: 'Controls', icon: SlidersHorizontal },
-  { to: '/settings', label: 'Reports', icon: ClipboardList },
 ]
 
 interface AppShellProps {
@@ -91,7 +86,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Outer padding to expose the lush gradient background */}
       <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* Glassy frame that contains the entire app */}
-        <div className="glass-card rounded-[28px] overflow-hidden">
+        <div className="glass-card bg-leaves rounded-[28px] overflow-hidden">
           {/* Top bar */}
           <header className="flex items-center gap-3 px-4 sm:px-6 py-4">
             {/* Logo + title */}
@@ -204,9 +199,6 @@ export function AppShell({ children }: AppShellProps) {
                     </Link>
                   )
                 })}
-                <div className="glass-pill h-11 w-11 rounded-2xl flex items-center justify-center text-foreground/60">
-                  <Hash className="h-5 w-5" />
-                </div>
               </nav>
               <div className="flex flex-col items-center gap-3">
                 <Link

@@ -258,40 +258,38 @@ function DiagnosePage() {
   return (
     <AppShell>
       <div className="grid grid-cols-12 gap-4">
-        {/* Hero / capture card — matches "Overview" greenhouse block */}
-        <HeroCaptureCard
-          className="col-span-12 lg:col-span-8"
-          today={today}
-          stream={stream}
-          videoRef={videoRef}
-          canvasRef={canvasRef}
-          photoUrl={photoUrl}
-          plantType={plantType}
-          onPlantChange={setPlantType}
-          onCapture={capturePhoto}
-          onRetake={retakePhoto}
-          onFlip={flipCamera}
-          onPickFile={() => fileInputRef.current?.click()}
-          onDiagnose={uploadPhoto}
-          hasMultipleCameras={hasMultipleCameras}
-          cameraReady={cameraReady}
-          uploading={uploading}
-        />
+        {/* Left column: hero capture + weather/soil under it */}
+        <div className="col-span-12 lg:col-span-8 flex flex-col gap-4">
+          <HeroCaptureCard
+            today={today}
+            stream={stream}
+            videoRef={videoRef}
+            canvasRef={canvasRef}
+            photoUrl={photoUrl}
+            plantType={plantType}
+            onPlantChange={setPlantType}
+            onCapture={capturePhoto}
+            onRetake={retakePhoto}
+            onFlip={flipCamera}
+            onPickFile={() => fileInputRef.current?.click()}
+            onDiagnose={uploadPhoto}
+            hasMultipleCameras={hasMultipleCameras}
+            cameraReady={cameraReady}
+            uploading={uploading}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <WeatherForecastCard />
+            <SoilConditionCard />
+          </div>
+        </div>
 
-        {/* Right column: prediction chart + AI prompt + disease info */}
+        {/* Right column: prediction + AI prompt + disease info + nearest shop */}
         <div className="col-span-12 lg:col-span-4 flex flex-col gap-4">
           <PredictionModelCard result={result} plantType={plantType} />
           <AiPromptCard result={result} plantType={plantType} hasPhoto={!!photoUrl} />
           <DiseaseInfoCard result={result} plantType={plantType} />
+          <ShopDirectionsCard result={result} />
         </div>
-
-        {/* Bottom row: Weather Forecast + Soil Condition + Shop directions */}
-        <WeatherForecastCard className="col-span-12 md:col-span-6 lg:col-span-4" />
-        <SoilConditionCard className="col-span-12 md:col-span-6 lg:col-span-4" />
-        <ShopDirectionsCard
-          className="col-span-12 md:col-span-12 lg:col-span-4"
-          result={result}
-        />
 
         {/* Error / status toast */}
         {message && (
@@ -417,7 +415,7 @@ function HeroCaptureCard({
       </header>
 
       {/* Hero media */}
-      <div className="relative mt-4 rounded-[18px] overflow-hidden bg-gradient-to-b from-[#f5f8f4] to-[#eef3ea] aspect-[16/9] sm:aspect-[16/8]">
+      <div className="relative mt-4 rounded-[18px] overflow-hidden bg-gradient-to-b from-[#f5f8f4] to-[#eef3ea] aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] xl:aspect-[16/11]">
         {photoUrl ? (
           <img
             src={photoUrl}

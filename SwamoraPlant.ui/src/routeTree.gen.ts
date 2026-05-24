@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as DiagnoseRouteImport } from './routes/diagnose'
-import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FarmsFarmIdRouteImport } from './routes/farms.$farmId'
@@ -30,11 +29,6 @@ const MapRoute = MapRouteImport.update({
 const DiagnoseRoute = DiagnoseRouteImport.update({
   id: '/diagnose',
   path: '/diagnose',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DevicesRoute = DevicesRouteImport.update({
-  id: '/devices',
-  path: '/devices',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -56,7 +50,6 @@ const FarmsFarmIdRoute = FarmsFarmIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/devices': typeof DevicesRoute
   '/diagnose': typeof DiagnoseRoute
   '/map': typeof MapRoute
   '/settings': typeof SettingsRoute
@@ -65,7 +58,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/devices': typeof DevicesRoute
   '/diagnose': typeof DiagnoseRoute
   '/map': typeof MapRoute
   '/settings': typeof SettingsRoute
@@ -75,7 +67,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/devices': typeof DevicesRoute
   '/diagnose': typeof DiagnoseRoute
   '/map': typeof MapRoute
   '/settings': typeof SettingsRoute
@@ -86,25 +77,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
-    | '/devices'
     | '/diagnose'
     | '/map'
     | '/settings'
     | '/farms/$farmId'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/dashboard'
-    | '/devices'
-    | '/diagnose'
-    | '/map'
-    | '/settings'
-    | '/farms/$farmId'
+  to: '/' | '/dashboard' | '/diagnose' | '/map' | '/settings' | '/farms/$farmId'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
-    | '/devices'
     | '/diagnose'
     | '/map'
     | '/settings'
@@ -114,7 +96,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
-  DevicesRoute: typeof DevicesRoute
   DiagnoseRoute: typeof DiagnoseRoute
   MapRoute: typeof MapRoute
   SettingsRoute: typeof SettingsRoute
@@ -144,13 +125,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DiagnoseRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/devices': {
-      id: '/devices'
-      path: '/devices'
-      fullPath: '/devices'
-      preLoaderRoute: typeof DevicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -178,7 +152,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
-  DevicesRoute: DevicesRoute,
   DiagnoseRoute: DiagnoseRoute,
   MapRoute: MapRoute,
   SettingsRoute: SettingsRoute,
