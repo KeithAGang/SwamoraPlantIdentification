@@ -20,5 +20,4 @@ export default defineConfig({
     ssl: isLocal ? false : { rejectUnauthorized: false },
   },
   verbose: true,
-  strict: true,
 });
