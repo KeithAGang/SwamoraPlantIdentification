@@ -1,9 +1,8 @@
 # ── Usage ──────────────────────────────────────────────────────────────────
-# Set DATABASE_URL in .env to your Supabase or external Postgres connection
-# string, then run:
-#   docker compose up --build
+# docker compose up --build
 #
-# Create a .env file at the repo root based on .env.example before running.
+# DATABASE_URL is set by docker-compose.override.yml (local db) or injected
+# by Render at runtime. You do not need to set it here.
 # ───────────────────────────────────────────────────────────────────────────
 
 services:
@@ -22,7 +21,6 @@ services:
     environment:
       PORT: 3000
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
       # Same origin — only needed if you call the API from a different domain.
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
