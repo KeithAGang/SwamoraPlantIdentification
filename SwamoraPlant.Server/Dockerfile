@@ -1,6 +1,6 @@
 # Use the Debian-slim image instead of Alpine because onnxruntime-node's
 # prebuilt native binary is linked against glibc, not musl.
-FROM node:20-slim AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ COPY src/ ./src/
 RUN npx tsc
 
 # ── Production image ──────────────────────────────────────────────────────────
-FROM node:20-slim
+FROM node:24-slim
 
 WORKDIR /app
 

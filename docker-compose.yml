@@ -1,58 +1,38 @@
-services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: swamora
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
+# ── Usage ──────────────────────────────────────────────────────────────────
+# Set DATABASE_URL in .env to your Supabase or external Postgres connection
+# string, then run:
+#   docker compose up --build
+#
+# Create a .env file at the repo root based on .env.example before running.
+# ───────────────────────────────────────────────────────────────────────────
 
+services:
+  # ── API + UI (single container) ───────────────────────────────────────────
+  # The root Dockerfile builds the React UI and copies the dist into the Hono
+  # server's public/ directory. Hono serves the SPA at / and the API at /api.
   api:
     build:
-      context: ./SwamoraPlant.Server
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    env_file:
-      - ./SwamoraPlant.Server/.env
-    environment:
-      # Override DATABASE_URL to use the Docker service name instead of localhost
-      DATABASE_URL: postgres://admin:root@db:5432/swamora
-      NODE_ENV: production
-      ALLOWED_ORIGINS: "http://localhost:5173,http://localhost,https://5tdvftv5-5173.uks1.devtunnels.ms"
-      UPLOAD_ROOT: /app/uploads
-    volumes:
-      # Persist user-uploaded plant images outside the container for the data moat.
-      - uploads:/app/uploads
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-
-  ui:
-    build:
-      context: ./SwamoraPlant.ui
+      context: .
       dockerfile: Dockerfile
       args:
-        # Empty → frontend uses relative paths; nginx proxies /api to api:3000
-        VITE_API_BASE_URL: ""
         VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY:-}
         VITE_GOOGLE_MAPS_MAP_ID: ${VITE_GOOGLE_MAPS_MAP_ID:-}
     ports:
-      - "5173:80"
-    depends_on:
-      - api
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      # Same origin — only needed if you call the API from a different domain.
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      UPLOAD_ROOT: /app/uploads
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+    volumes:
+      - uploads:/app/uploads
     restart: unless-stopped
 
 volumes:
-  pgdata:
   uploads:

@@ -1,0 +1,63 @@
+services:
+  - type: web
+    name: swamoraplant
+    runtime: docker
+    # Build from the repo root so the Dockerfile can reference both
+    # SwamoraPlant.Server/ and SwamoraPlant.ui/.
+    dockerfilePath: ./Dockerfile
+    # Render sets PORT=10000 automatically; the server reads process.env.PORT.
+    healthCheckPath: /api/ping
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # ── Database ──────────────────────────────────────────────────────────
+      # Option A — Supabase (recommended for zero-ops):
+      #   Paste your direct-connection URL (port 5432, NOT the pooled 6543).
+      #   Format: postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres
+      - key: DATABASE_URL
+        sync: false
+      # Option B — Render-managed Postgres:
+      #   1. Uncomment the `databases:` block at the bottom of this file.
+      #   2. Replace the `sync: false` line above with:
+      #        fromDatabase:
+      #          name: swamoraplant-db
+      #          property: connectionString
+
+      - key: JWT_SECRET
+        generateValue: true
+
+      # Set this to your Render service URL after the first deploy, e.g.:
+      #   https://swamoraplant.onrender.com
+      # Leave blank if the UI and API are always on the same origin (they are
+      # in this setup — same container), but you may want it if you later add
+      # a separate mobile client or a custom domain.
+      - key: ALLOWED_ORIGINS
+        sync: false
+
+      # ── Groq / Savi chat ──────────────────────────────────────────────────
+      # Leave blank to run in stub-streaming demo mode.
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+
+      # ── Google Maps ───────────────────────────────────────────────────────
+      # Used by /api/shops and baked into the React bundle at build time.
+      # Render passes all envVars as Docker build args automatically, so
+      # VITE_GOOGLE_MAPS_API_KEY will be available to the Vite build inside
+      # the Dockerfile. Leave blank to use mock shop results.
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+      - key: VITE_GOOGLE_MAPS_API_KEY
+        sync: false
+      - key: VITE_GOOGLE_MAPS_MAP_ID
+        sync: false
+
+# ── Option B: Render-managed Postgres ─────────────────────────────────────
+# Uncomment this block if you prefer Render's Postgres over Supabase.
+# Then update the DATABASE_URL envVar above to use fromDatabase (see comment).
+# databases:
+#   - name: swamoraplant-db
+#     databaseName: swamora
+#     plan: free

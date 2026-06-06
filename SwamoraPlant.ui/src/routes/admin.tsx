@@ -523,7 +523,11 @@ function Chip({ label, solid }: { label: string; solid?: boolean }) {
   )
 }
 
-function pluralCount<T>(filtered: T[], full: T[], section: Section) {
+function pluralCount(
+  filtered: AdminUser[] | AdminFarm[] | AdminDiagnosis[],
+  full: AdminUser[] | AdminFarm[] | AdminDiagnosis[],
+  section: Section,
+) {
   const label =
     section === 'users'
       ? 'users'
@@ -1402,7 +1406,7 @@ function HelpSection() {
           icon={<LayoutDashboard className="h-4 w-4" />}
           title="API reference"
           body="OpenAPI docs for every endpoint."
-          href="http://localhost:3000/reference"
+          href="/reference"
         />
         <HelpTile
           icon={<ShieldCheck className="h-4 w-4" />}

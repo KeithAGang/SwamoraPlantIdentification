@@ -1,4 +1,5 @@
 import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { apiReference } from '@scalar/hono-api-reference';
 import { cors } from 'hono/cors';
@@ -67,6 +68,8 @@ app.route('/api/farms', farmsRouter as any);
 app.route('/api/admin', adminRouter as any);
 app.route('/api/shop-submissions', shopSubmissionsRouter as any);
 
+app.get('/api/ping', (c) => c.json({ ok: true }));
+
 app.get('/doc', (c) => {
   const schema = app.getOpenAPIDocument({
     openapi: '3.0.0',
@@ -85,9 +88,17 @@ app.get(
   apiReference({ spec: { url: '/doc' } } as any)
 );
 
-app.get('/', (c) =>
-  c.text('SwamoraPlant Server is running. Visit /reference for API docs.')
-);
+// Serve the built React frontend when public/ exists (production).
+// In dev, requests fall through and the Vite dev server handles the UI.
+if (fs.existsSync('./public/index.html')) {
+  app.use('/*', serveStatic({ root: './public' }));
+  // SPA fallback: any route the static middleware didn't resolve → index.html
+  app.get('/*', serveStatic({ path: 'index.html', root: './public' }));
+} else {
+  app.get('/', (c) =>
+    c.text('SwamoraPlant Server is running. Visit /reference for API docs.')
+  );
+}
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -101,4 +112,12 @@ if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH) {
 } else {
   serve({ fetch: app.fetch, port });
   console.log(`Server running on http://localhost:${port}`);
+}
+
+// Keep Render's free tier awake by pinging the health endpoint every 20 min.
+const serviceUrl = process.env.RENDER_EXTERNAL_URL;
+if (serviceUrl) {
+  setInterval(() => {
+    fetch(`${serviceUrl}/api/ping`).catch(() => {});
+  }, 20 * 60 * 1000);
 }
