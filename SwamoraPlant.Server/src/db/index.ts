@@ -7,8 +7,9 @@ dotenv.config();
 
 const connectionString = process.env.DATABASE_URL!;
 
+const isLocal = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
 const client = postgres(connectionString, {
   prepare: false,
-  ssl: connectionString.includes('supabase.co') ? { rejectUnauthorized: false } : undefined,
+  ssl: isLocal ? undefined : { rejectUnauthorized: false },
 });
 export const db = drizzle(client, { schema });
