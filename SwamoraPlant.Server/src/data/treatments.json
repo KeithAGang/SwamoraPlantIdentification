@@ -1,0 +1,142 @@
+{
+  "potato": {
+    "healthy": {
+      "summary": "Plant looks healthy — no treatment needed.",
+      "medicine": null,
+      "products": [],
+      "productKeywords": []
+    },
+    "early_blight": {
+      "summary": "Early blight (Alternaria solani). Remove affected leaves and apply Metalaxyl + Mancozeb (or an alternative such as Kumir, Snow shrf, or Antracol) on a 7–10 day schedule.",
+      "medicine": "Metalaxyl + Mancozeb",
+      "products": [
+        { "name": "Metalaxyl + Mancozeb", "size": "1kg", "priceUsd": 12 },
+        { "name": "Kumir", "size": "1L", "priceUsd": 18 },
+        { "name": "Snow shrf", "size": "1kg", "priceUsd": 22 },
+        { "name": "Antracol", "size": "1kg", "priceUsd": 22 }
+      ],
+      "productKeywords": ["Metalaxyl", "Mancozeb", "Antracol", "Kumir"]
+    },
+    "late_blight": {
+      "summary": "Late blight (Phytophthora infestans). Act fast — apply Metalaxyl + Mancozeb (or Kumir, Snow shrf, or Antracol) and destroy heavily infected plants.",
+      "medicine": "Metalaxyl + Mancozeb",
+      "products": [
+        { "name": "Metalaxyl + Mancozeb", "size": "1kg", "priceUsd": 12 },
+        { "name": "Kumir", "size": "1L", "priceUsd": 18 },
+        { "name": "Snow shrf", "size": "1kg", "priceUsd": 22 },
+        { "name": "Antracol", "size": "1kg", "priceUsd": 22 }
+      ],
+      "productKeywords": ["Metalaxyl", "Mancozeb", "Antracol", "Kumir"]
+    }
+  },
+  "tomato": {
+    "healthy": {
+      "summary": "Plant looks healthy — no treatment needed.",
+      "medicine": null,
+      "products": [],
+      "productKeywords": []
+    },
+    "early_blight": {
+      "summary": "Early blight. Prune lower leaves and apply Antracol, Metalaxyl + Mancozeb, or Kumir on a weekly schedule.",
+      "medicine": "Metalaxyl + Mancozeb",
+      "products": [
+        { "name": "Antracol", "size": "1kg", "priceUsd": 22 },
+        { "name": "Metalaxyl + Mancozeb", "size": "1kg", "priceUsd": 12 },
+        { "name": "Kumir", "size": "1L", "priceUsd": 18 }
+      ],
+      "productKeywords": ["Antracol", "Metalaxyl", "Mancozeb", "Kumir"]
+    },
+    "late_blight": {
+      "summary": "Late blight. Apply Antracol, Metalaxyl + Mancozeb, or Kumir immediately and remove infected foliage.",
+      "medicine": "Metalaxyl + Mancozeb",
+      "products": [
+        { "name": "Antracol", "size": "1kg", "priceUsd": 22 },
+        { "name": "Metalaxyl + Mancozeb", "size": "1kg", "priceUsd": 12 },
+        { "name": "Kumir", "size": "1L", "priceUsd": 18 }
+      ],
+      "productKeywords": ["Antracol", "Metalaxyl", "Mancozeb", "Kumir"]
+    },
+    "leaf_mold": {
+      "summary": "Leaf mold (Passalora fulva). Improve ventilation and apply Wettable Sulphur.",
+      "medicine": "Wettable Sulphur",
+      "products": [
+        { "name": "Wettable Sulphur", "size": "1kg", "priceUsd": 10 }
+      ],
+      "productKeywords": ["Wettable Sulphur", "Sulphur fungicide"]
+    },
+    "septoria_leaf_spot": {
+      "summary": "Septoria leaf spot. Remove infected leaves and apply copper or chlorothalonil fungicide.",
+      "medicine": "Copper fungicide",
+      "products": [],
+      "productKeywords": ["copper fungicide", "chlorothalonil"]
+    },
+    "bacterial_spot": {
+      "summary": "Bacterial spot. Apply copper-based bactericide; rotate crops next season.",
+      "medicine": "Copper bactericide",
+      "products": [],
+      "productKeywords": ["copper bactericide", "copper sulfate"]
+    },
+    "spider_mites": {
+      "summary": "Two-spotted spider mites. Spray with Abamectin, Nemesis, or Magnum Gold; rinse foliage to dislodge mites.",
+      "medicine": "Abamectin",
+      "products": [
+        { "name": "Abamectin", "size": "1L", "priceUsd": 13 },
+        { "name": "Nemesis", "size": "1L", "priceUsd": 18 },
+        { "name": "Magnum Gold", "size": "1L", "priceUsd": 30 }
+      ],
+      "productKeywords": ["Abamectin", "Nemesis", "Magnum Gold", "miticide"]
+    },
+    "target_spot": {
+      "summary": "Target spot (Corynespora cassiicola). Apply chlorothalonil or mancozeb fungicide and remove infected lower leaves.",
+      "medicine": "Chlorothalonil fungicide",
+      "products": [],
+      "productKeywords": ["chlorothalonil fungicide", "mancozeb fungicide"]
+    },
+    "yellow_leaf_curl_virus": {
+      "summary": "Tomato Yellow Leaf Curl Virus — spread by whiteflies. Remove infected plants and control whiteflies with imidacloprid or insecticidal soap.",
+      "medicine": "Imidacloprid insecticide",
+      "products": [],
+      "productKeywords": ["imidacloprid insecticide", "whitefly control"]
+    },
+    "mosaic_virus": {
+      "summary": "Tomato mosaic virus — no chemical cure. Remove infected plants, disinfect tools, and avoid handling plants after tobacco.",
+      "medicine": null,
+      "products": [],
+      "productKeywords": []
+    }
+  },
+  "maize": {
+    "healthy": {
+      "summary": "Plant looks healthy — no treatment needed.",
+      "medicine": null,
+      "products": [],
+      "productKeywords": []
+    },
+    "common_rust": {
+      "summary": "Common rust (Puccinia sorghi). Apply Tebuconazole or Shavit if infection is heavy.",
+      "medicine": "Tebuconazole",
+      "products": [
+        { "name": "Tebuconazole", "size": "1L", "priceUsd": 12 },
+        { "name": "Shavit", "size": "1L", "priceUsd": 15 }
+      ],
+      "productKeywords": ["Tebuconazole", "Shavit"]
+    },
+    "northern_leaf_blight": {
+      "summary": "Northern leaf blight (Exserohilum turcicum). Apply Azoxystrobin or Copper Oxychloride; rotate crops.",
+      "medicine": "Azoxystrobin",
+      "products": [
+        { "name": "Azoxystrobin", "size": "1L", "priceUsd": 25 },
+        { "name": "Copper Oxychloride", "size": "1kg", "priceUsd": 14 }
+      ],
+      "productKeywords": ["Azoxystrobin", "Copper Oxychloride"]
+    },
+    "gray_leaf_spot": {
+      "summary": "Gray leaf spot (Cercospora zeae-maydis). Apply Triadimenol and improve residue management.",
+      "medicine": "Triadimenol",
+      "products": [
+        { "name": "Triadimenol", "size": "300g", "priceUsd": 6 }
+      ],
+      "productKeywords": ["Triadimenol", "triazole fungicide"]
+    }
+  }
+}

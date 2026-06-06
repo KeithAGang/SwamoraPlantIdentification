@@ -1,0 +1,319 @@
+/**
+ * Shop Finder — the live agriculture-shops directory.
+ *
+ * Two modes:
+ *   1. Browse:   /map               → free-text search over Zimbabwean agri shops
+ *   2. Filtered: /map?diagnosisId=N → pre-filtered to shops stocking the
+ *                                     treatment for that diagnosis
+ *
+ * The previous greenhouse monitoring view lives in _archive_map.backup.tsx.txt.
+ */
+
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowUpRight, MapPin, Navigation, Search, Star, X } from 'lucide-react'
+import { useAuthGuard } from '@/hooks/useAuthGuard'
+import { AppShell } from '@/components/AppShell'
+import { ShopFinderMap } from '@/components/monitoring/ShopFinderMap'
+import { shopsApi, type Shop } from '@/lib/shops'
+import {
+  diagnoseApi,
+  formatLabel,
+  getBrowserLocation,
+  type DiagnosisResult,
+} from '@/lib/diagnose'
+import { cn } from '@/lib/utils'
+
+const HARARE = { lat: -17.8252, lng: 31.0335 }
+
+interface MapSearch {
+  diagnosisId?: number
+}
+
+export const Route = createFileRoute('/map')({
+  component: MapPage,
+  validateSearch: (search: Record<string, unknown>): MapSearch => ({
+    diagnosisId:
+      typeof search.diagnosisId === 'number'
+        ? search.diagnosisId
+        : typeof search.diagnosisId === 'string' && /^\d+$/.test(search.diagnosisId)
+          ? Number(search.diagnosisId)
+          : undefined,
+  }),
+})
+
+function MapPage() {
+  const ready = useAuthGuard()
+  const { diagnosisId } = Route.useSearch()
+  const navigate = useNavigate()
+
+  const [origin, setOrigin] = useState<{ lat: number; lng: number }>(HARARE)
+  const [originResolved, setOriginResolved] = useState(false)
+  const [diagnosis, setDiagnosis] = useState<DiagnosisResult | null>(null)
+  const [shops, setShops] = useState<Shop[]>([])
+  const [loading, setLoading] = useState(false)
+  const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [query, setQuery] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  // Step 1: resolve origin (browser geolocation → Harare fallback) and (optionally)
+  // load the diagnosis so we know which product to filter by.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const [loc, d] = await Promise.all([
+        getBrowserLocation(),
+        diagnosisId !== undefined
+          ? diagnoseApi.getById(diagnosisId).catch(() => null)
+          : Promise.resolve(null),
+      ])
+      if (cancelled) return
+      setOrigin(loc ?? HARARE)
+      setOriginResolved(true)
+      setDiagnosis(d ?? null)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [diagnosisId])
+
+  // Step 2: once we have an origin, search for shops. Re-run when filter changes.
+  const productKeywords = useMemo(
+    () => diagnosis?.treatment?.productKeywords ?? [],
+    [diagnosis],
+  )
+  // Avoid hammering the API on every keystroke.
+  const debouncedQuery = useDebounced(query, 400)
+
+  useEffect(() => {
+    if (!originResolved) return
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    shopsApi
+      .search({
+        lat: origin.lat,
+        lng: origin.lng,
+        query: debouncedQuery || undefined,
+        productKeywords: productKeywords.length > 0 ? productKeywords : undefined,
+        limit: 12,
+      })
+      .then((res) => {
+        if (cancelled) return
+        setShops(res.shops)
+        setActiveIndex(res.shops.length > 0 ? 0 : null)
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return
+        const axiosErr = err as { response?: { data?: { error?: string } } }
+        setError(axiosErr.response?.data?.error || 'Could not load shops.')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [origin, originResolved, debouncedQuery, productKeywords])
+
+  if (!ready) return null
+
+  const clearFilter = () => navigate({ to: '/map' })
+  const activeShop = activeIndex !== null ? shops[activeIndex] : null
+
+  return (
+    <AppShell title="Find Shops">
+      {/* Active filter banner */}
+      {diagnosis && (
+        <div className="mb-3 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 flex items-start justify-between gap-2">
+          <div className="text-xs leading-snug">
+            <span className="font-semibold">
+              Showing shops with{' '}
+              <span className="text-primary">
+                {diagnosis.treatment.medicine ?? 'recommended treatment'}
+              </span>
+            </span>
+            <span className="text-muted-foreground">
+              {' '}
+              for {diagnosis.plant} · {formatLabel(diagnosis.topPrediction.label)}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={clearFilter}
+            className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-[11px] hover:bg-muted shrink-0"
+          >
+            <X className="h-3 w-3" />
+            Clear filter
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-12 gap-3 md:gap-4">
+        {/* Map */}
+        <div className="col-span-12 lg:col-span-7 rounded-2xl bg-card border border-border shadow-paper overflow-hidden">
+          <div className="h-[420px] lg:h-[600px]">
+            <ShopFinderMap
+              origin={origin}
+              shops={shops}
+              activeShopIndex={activeIndex}
+              onShopClick={setActiveIndex}
+            />
+          </div>
+        </div>
+
+        {/* Right column: search + result list */}
+        <div className="col-span-12 lg:col-span-5 rounded-2xl bg-card border border-border shadow-paper p-4 md:p-5 flex flex-col gap-3 lg:max-h-[600px]">
+          {/* Search box */}
+          <label
+            className={cn(
+              'flex items-center gap-2 h-10 rounded-full border border-border px-3 bg-muted/40',
+              diagnosis && 'opacity-60',
+            )}
+          >
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={
+                diagnosis ? 'Disabled while filter is active' : 'Search shops (e.g. fertilizer)'
+              }
+              className="flex-1 bg-transparent outline-none text-sm"
+              disabled={!!diagnosis}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </label>
+
+          {/* Status / count */}
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>
+              {loading
+                ? 'Searching…'
+                : `${shops.length} shop${shops.length === 1 ? '' : 's'} found`}
+            </span>
+            <span>
+              {origin.lat.toFixed(3)}, {origin.lng.toFixed(3)}
+            </span>
+          </div>
+
+          {error && (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+              {error}
+            </div>
+          )}
+
+          {/* Results */}
+          <ul className="flex-1 overflow-y-auto pr-1 space-y-2">
+            {!loading && shops.length === 0 && !error && (
+              <li className="text-center text-xs text-muted-foreground py-8">
+                No shops found nearby. Try a different search term.
+              </li>
+            )}
+            {shops.map((shop, i) => (
+              <ShopRow
+                key={shop.name + shop.address}
+                shop={shop}
+                origin={origin}
+                active={i === activeIndex}
+                onClick={() => setActiveIndex(i)}
+              />
+            ))}
+          </ul>
+
+          {/* "Get directions" for active shop */}
+          {activeShop && (
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${activeShop.location.lat},${activeShop.location.lng}`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center justify-center gap-2 h-10 rounded-full px-4 text-xs font-medium bg-[#1a1d1a] text-white hover:bg-[#262a26] transition-colors"
+            >
+              <Navigation className="h-3.5 w-3.5" />
+              Get directions to {activeShop.name}
+            </a>
+          )}
+        </div>
+      </div>
+    </AppShell>
+  )
+}
+
+interface ShopRowProps {
+  shop: Shop
+  origin: { lat: number; lng: number }
+  active: boolean
+  onClick: () => void
+}
+
+function ShopRow({ shop, origin, active, onClick }: ShopRowProps) {
+  const rowRef = useRef<HTMLLIElement>(null)
+  useEffect(() => {
+    if (active && rowRef.current) {
+      rowRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [active])
+
+  const km =
+    shop.distanceMeters !== undefined ? (shop.distanceMeters / 1000).toFixed(1) : null
+
+  return (
+    <li ref={rowRef}>
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          'w-full text-left rounded-xl border px-3 py-2.5 transition-colors',
+          active
+            ? 'border-primary/60 bg-primary/5 shadow-paper'
+            : 'border-border bg-card hover:bg-muted/50',
+        )}
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold truncate">{shop.name}</div>
+            <div className="text-[11px] text-muted-foreground truncate">{shop.address}</div>
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
+              {km && (
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-2.5 w-2.5" /> {km} km
+                </span>
+              )}
+              {shop.rating !== undefined && (
+                <span className="inline-flex items-center gap-1">
+                  <Star className="h-2.5 w-2.5 fill-yellow-500 text-yellow-500" />
+                  {shop.rating.toFixed(1)}
+                </span>
+              )}
+            </div>
+          </div>
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${shop.location.lat},${shop.location.lng}`}
+            target="_blank"
+            rel="noreferrer noopener"
+            onClick={(e) => e.stopPropagation()}
+            className="shrink-0 inline-flex items-center gap-1 text-[10px] text-primary hover:underline"
+          >
+            Directions <ArrowUpRight className="h-2.5 w-2.5" />
+          </a>
+        </div>
+      </button>
+    </li>
+  )
+}
+
+function useDebounced<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(t)
+  }, [value, delay])
+  return debounced
+}

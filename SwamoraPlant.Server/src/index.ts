@@ -4,6 +4,13 @@ import { apiReference } from '@scalar/hono-api-reference';
 import { cors } from 'hono/cors';
 import { imageRouter } from './routes/image.routes.js';
 import { authRouter } from './routes/auth.routes.js';
+import { diagnoseRouter } from './routes/diagnose.routes.js';
+import { shopsRouter } from './routes/shops.routes.js';
+import { chatRouter } from './routes/chat.routes.js';
+import { favoritesRouter } from './routes/favorites.routes.js';
+import { shopSubmissionsRouter } from './routes/shop-submissions.routes.js';
+import { farmsRouter } from './routes/farms.routes.js';
+import { adminRouter } from './routes/admin.routes.js';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as https from 'https';
@@ -20,9 +27,22 @@ app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
 
 app.use('*', cors({
   origin: (origin) => {
-    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
-    if (allowedOrigins.includes(origin) || !origin || process.env.NODE_ENV !== 'production') {
+    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || [];
+    if (!origin || process.env.NODE_ENV !== 'production') {
       return origin;
+    }
+    if (allowedOrigins.includes(origin)) {
+      return origin;
+    }
+    // Allow common tunnel providers (VS Code dev tunnels, ngrok, cloudflare) so
+    // the app can be shared from a local dev machine during demos.
+    try {
+      const host = new URL(origin).hostname;
+      if (/\.(devtunnels\.ms|ngrok-free\.app|ngrok\.io|trycloudflare\.com)$/i.test(host)) {
+        return origin;
+      }
+    } catch {
+      // fall through
     }
     return allowedOrigins[0];
   },
@@ -34,6 +54,18 @@ app.use('*', cors({
 
 app.route('/api/auth', authRouter);
 app.route('/api/image', imageRouter);
+app.route('/api/diagnose', diagnoseRouter);
+app.route('/api/shops', shopsRouter);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.route('/api/savi', chatRouter as any);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.route('/api/favorites', favoritesRouter as any);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.route('/api/farms', farmsRouter as any);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.route('/api/admin', adminRouter as any);
+app.route('/api/shop-submissions', shopSubmissionsRouter as any);
 
 app.get('/doc', (c) => {
   const schema = app.getOpenAPIDocument({

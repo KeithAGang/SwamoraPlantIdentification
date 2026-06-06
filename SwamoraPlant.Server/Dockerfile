@@ -1,4 +1,6 @@
-FROM node:20-alpine AS builder
+# Use the Debian-slim image instead of Alpine because onnxruntime-node's
+# prebuilt native binary is linked against glibc, not musl.
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
@@ -11,7 +13,7 @@ COPY src/ ./src/
 RUN npx tsc
 
 # ── Production image ──────────────────────────────────────────────────────────
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 
@@ -20,6 +22,12 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 COPY --from=builder /app/dist ./dist
+
+# Static runtime assets that TypeScript doesn't compile:
+#   - treatments.json is read by recommendation.service.js at ../data/...
+#   - models/ holds ONNX weights + labels referenced by plant-types.js at ../../models/...
+COPY src/data ./dist/data
+COPY models ./models
 
 # drizzle-kit needs the config and the raw schema file to introspect and push
 COPY drizzle.config.ts ./

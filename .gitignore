@@ -4,7 +4,6 @@
 # Environment — commit .env.example, never .env
 **/.env
 !**/.env.example
-
 # Build artifacts
 **/dist/
 **/build/
@@ -17,6 +16,18 @@
 
 # Drizzle generated output (optional: remove this line to commit migrations)
 SwamoraPlant.Server/drizzle/
+
+# ML model weights — large binaries, distributed out-of-band
+SwamoraPlant.Server/models/**/*.onnx
+
+# Training datasets — large, distributed out-of-band
+/data/
+
+# Python virtual environments + bytecode (training scripts)
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.pyc
 
 # OS
 .DS_Store

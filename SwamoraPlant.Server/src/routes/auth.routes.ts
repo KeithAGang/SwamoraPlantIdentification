@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { findUserByEmail, comparePassword, signToken } from '../services/auth.service.js';
+import { findUserByEmail, comparePassword, signToken, createUser } from '../services/auth.service.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 
 export const authRouter = new OpenAPIHono();
@@ -32,6 +32,7 @@ const loginRoute = createRoute({
               id: z.number(),
               email: z.string(),
               name: z.string(),
+              isAdmin: z.boolean(),
             }),
           }),
         },
@@ -64,6 +65,7 @@ const meRoute = createRoute({
             id: z.number(),
             email: z.string(),
             name: z.string(),
+            isAdmin: z.boolean(),
           }),
         },
       },
@@ -87,7 +89,88 @@ authRouter.openapi(loginRoute, async (c) => {
     return c.json({ error: 'Invalid email or password' }, 401);
   }
   const token = await signToken({ id: user.id, email: user.email });
-  return c.json({ token, user: { id: user.id, email: user.email, name: user.name } }, 200);
+  return c.json(
+    {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        isAdmin: user.isAdmin,
+      },
+    },
+    200,
+  );
+});
+
+const signupRoute = createRoute({
+  method: 'post',
+  path: '/signup',
+  tags: ['Auth'],
+  summary: 'Create account',
+  description: 'Register a new user with name, email and password. Returns a JWT bearer token.',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            name: z.string().min(1).openapi({ example: 'Jane Farmer' }),
+            email: z.string().email().openapi({ example: 'jane@farm.example' }),
+            password: z.string().min(8).openapi({ example: 'abcd1234' }),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            token: z.string().openapi({ description: 'JWT bearer token' }),
+            user: z.object({
+              id: z.number(),
+              email: z.string(),
+              name: z.string(),
+              isAdmin: z.boolean(),
+            }),
+          }),
+        },
+      },
+      description: 'Account created',
+    },
+    409: {
+      content: {
+        'application/json': {
+          schema: z.object({ error: z.string() }),
+        },
+      },
+      description: 'Email already registered',
+    },
+  },
+});
+
+authRouter.openapi(signupRoute, async (c) => {
+  const { name, email, password } = c.req.valid('json');
+  const existing = await findUserByEmail(email);
+  if (existing) {
+    return c.json({ error: 'Email is already registered' }, 409);
+  }
+  const created = await createUser(name, email, password);
+  const token = await signToken({ id: created.id, email: created.email });
+  // Newly created users are never admins by default.
+  return c.json(
+    {
+      token,
+      user: {
+        id: created.id,
+        email: created.email,
+        name: created.name,
+        isAdmin: false,
+      },
+    },
+    201,
+  );
 });
 
 authRouter.use('/me', authMiddleware);
@@ -96,5 +179,8 @@ authRouter.openapi(meRoute, async (c) => {
   const payload = (c as any).get('jwtUser') as { id: number; email: string };
   const user = await findUserByEmail(payload.email);
   if (!user) return c.json({ error: 'User not found' }, 401);
-  return c.json({ id: user.id, email: user.email, name: user.name }, 200);
+  return c.json(
+    { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin },
+    200,
+  );
 });

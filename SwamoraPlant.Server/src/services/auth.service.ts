@@ -24,3 +24,17 @@ export const findUserByEmail = async (email: string) => {
   const result = await db.select().from(users).where(eq(users.email, email));
   return result[0] ?? null;
 };
+
+export const findUserById = async (id: number) => {
+  const result = await db.select().from(users).where(eq(users.id, id));
+  return result[0] ?? null;
+};
+
+export const createUser = async (name: string, email: string, password: string) => {
+  const passwordHash = await hashPassword(password);
+  const result = await db
+    .insert(users)
+    .values({ name, email, passwordHash })
+    .returning({ id: users.id, email: users.email, name: users.name });
+  return result[0];
+};
