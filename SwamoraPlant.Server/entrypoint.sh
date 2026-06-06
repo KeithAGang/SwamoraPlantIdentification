@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# Supabase hostnames resolve to IPv6 first; force IPv4 so Render can reach them.
+export NODE_OPTIONS="--dns-result-order=ipv4first"
+
 if [ -z "$DATABASE_URL" ]; then
   echo "ERROR: DATABASE_URL is not set"
   exit 1
