@@ -7,6 +7,8 @@ dotenv.config();
 
 const connectionString = process.env.DATABASE_URL!;
 
-// Disable prefetch as it is not supported for "Transaction" pool mode
-const client = postgres(connectionString, { prepare: false });
+const client = postgres(connectionString, {
+  prepare: false,
+  ssl: connectionString.includes('supabase.co') ? { rejectUnauthorized: false } : undefined,
+});
 export const db = drizzle(client, { schema });
